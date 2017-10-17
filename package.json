@@ -1,5 +1,8 @@
 {
   "name": "tsk-bot",
+  "engines": {
+    "node": ">=8"
+  },
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
