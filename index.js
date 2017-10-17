@@ -10,6 +10,11 @@ const config = {
   verify: false
 };
 
+const BTC_THB_KEY = 1
+const OMG_THB_KEY = 26
+const btcTriggeredKeyword = ["bitcoin", "btc"]
+const omgTriggeredKeyword = ["omg"]
+
 const app = express();
 app.post('/webhook', line.middleware(config), (req, res) => {
   Promise
@@ -30,13 +35,24 @@ function handleEvent(event) {
     return Promise.resolve(null);
   }
 
-  if (["btc", "bitcoin"].indexOf(event.message.text.toLowerCase()) >= 0) {
-    return request("https://bx.in.th/api/")
-      .then((string) => {
-        const json = JSON.parse(string)
-        const lastBtcThbprice = commaNumber(json["1"].last_price)
-        const change = json["1"].change
-        const text = `ราคา Bitcoin ตอนนี้เท่ากับ ${lastBtcThbprice} บาท, เปลี่ยนแปลง ${change}%`
+  const allKeyword = btcTriggeredKeyword.concat(omgTriggeredKeyword)
+  const triggerMsg = event.message.text.toLowerCase()
+  if (allKeyword.indexOf(triggerMsg) >= 0) {
+    return Promise.all([request("https://bx.in.th/api/"), request("https://api.coindesk.com/v1/bpi/currentprice.json")])
+      .then((output) => {
+        const bxJson = JSON.parse(output[0])
+        let quoteKey
+        let usdPriceText = ''
+        if (btcTriggeredKeyword.indexOf(triggerMsg) >= 0) {
+          quoteKey = BTC_THB_KEY
+          const coindeskJson = JSON.parse(output[1])
+          usdPriceText = ` (ตลาดโลก $${coindeskJson.bpi.USD.rate})`
+        } else if (omgTriggeredKeyword.indexOf(triggerMsg) >= 0) {
+          quoteKey = OMG_THB_KEY
+        }
+        const lastPrice = commaNumber(bxJson[quoteKey].last_price)
+        const change = bxJson[quoteKey].change
+        const text = `ราคา ${triggerMsg.toUpperCase()} ตอนนี้เท่ากับ ${lastPrice} บาท${usdPriceText}, เปลี่ยนแปลง ${change}%`
 
         return client.replyMessage(event.replyToken, {
           type: 'text',
