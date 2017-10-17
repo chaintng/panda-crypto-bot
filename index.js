@@ -1,6 +1,7 @@
 const express = require('express')
 const request = require('request-promise')
 const line = require('@line/bot-sdk')
+const commaNumber = require('comma-number')
 require('dotenv').config()
 
 const config = {
@@ -33,9 +34,9 @@ function handleEvent(event) {
     return request("https://bx.in.th/api/")
       .then((string) => {
         const json = JSON.parse(string)
-        const lastBtcThbprice = json["1"].last_price
+        const lastBtcThbprice = commaNumber(json["1"].last_price)
         const change = json["1"].change
-        const text = `ราคา 1 Bitcoin ตอนนี้เท่ากับ ${lastBtcThbprice}, เปลี่ยนแปลง ${change}%`
+        const text = `ราคา Bitcoin ตอนนี้เท่ากับ ${lastBtcThbprice} บาท, เปลี่ยนแปลง ${change}%`
 
         return client.replyMessage(event.replyToken, {
           type: 'text',
