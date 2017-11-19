@@ -2,13 +2,19 @@ const express = require('express')
 const request = require('request-promise')
 const line = require('@line/bot-sdk')
 const commaNumber = require('comma-number')
+const Pageres = require('pageres');
+const imgur = require('imgur-node-api')
+const path = require('path');
 require('dotenv').config()
 
 const config = {
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
   channelSecret: process.env.LINE_CHANNEL_SECRET,
+  imgurClientId: process.env.IMGUR_CLIENT_ID,
   verify: false
 };
+
+imgur.setClientID(config.imgurClientId);
 
 const BTC_THB_KEY = 1
 const OMG_THB_KEY = 26
@@ -54,10 +60,35 @@ function handleEvent(event) {
         const change = bxJson[quoteKey].change
         const text = `ราคา ${triggerMsg.toUpperCase()} ตอนนี้เท่ากับ ${lastPrice} บาท${usdPriceText}, เปลี่ยนแปลง ${change}%`
 
-        return client.replyMessage(event.replyToken, {
-          type: 'text',
-          text: text
-        });
+        return new Pageres({delay: 2})
+          .src('https://www.coinbase.com/charts?locale=en', ['1200x600'], {
+            crop: true,
+            filename: "coinbasechart",
+            css: '.navbar-inner, section.summary, footer { display: none !important; } .charts-header { padding: 1px !important; }',
+          })
+          .dest(__dirname)
+          .run()
+          .then(() => {
+            return new Promise((resolve, reject) => {
+              imgur.upload(path.join(__dirname, 'coinbasechart.png'), function (err, res) {
+                if (res.data.link) {
+                  resolve(client.replyMessage(event.replyToken, [
+                    {
+                      type: 'text',
+                      text: text
+                    },
+                    {
+                      type: 'image',
+                      originalContentUrl: res.data.link,
+                      previewImageUrl: res.data.link
+                    }
+                  ]));
+                } else {
+                  reject(err)
+                }
+              });
+            })
+          });
       })
   }
 

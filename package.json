@@ -17,6 +17,8 @@
     "comma-number": "^2.0.0",
     "dotenv": "^4.0.0",
     "express": "^4.16.2",
+    "imgur-node-api": "^0.1.0",
+    "pageres": "^4.5.1",
     "request": "^2.83.0",
     "request-promise": "^4.2.2"
   }
