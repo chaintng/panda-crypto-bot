@@ -61,7 +61,7 @@ function handleEvent(event) {
         const text = `ราคา ${triggerMsg.toUpperCase()} ตอนนี้เท่ากับ ${lastPrice} บาท${usdPriceText}, เปลี่ยนแปลง ${change}%`
 
         return new Pageres({delay: 2})
-          .src('https://bitcoincharts.com/charts/bitstampUSD', ['1200x600'], {
+          .src('https://bitcoincharts.com/charts/bitstampUSD', ['1000x500'], {
             crop: true,
             filename: "coinbasechart",
             css: '#header, .adblock, .submenu, .container_12.chartoptions.content { display: none !important; }',
