@@ -1,0 +1,77 @@
+{
+	"info": {
+		"name": "LINE WEBHOOK",
+		"_postman_id": "e4c232a3-846f-7dd9-c26b-3a8bfab80596",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Message Event",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "f0e4ace3-4dc9-4146-a060-b5a4138dc6b5",
+						"type": "text/javascript",
+						"exec": [
+							"const LINE_CHANNEL_SECRET = pm.variables.get(\"LINE_CHANNEL_SECRET\");",
+							"const sig = CryptoJS.enc.Base64.stringify(CryptoJS.HmacSHA256(request.data, LINE_CHANNEL_SECRET))",
+							"postman.setEnvironmentVariable(\"LINE_X_KEY\", sig);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "x-line-signature",
+						"value": "{{LINE_X_KEY}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"events\": [\n      {\n        \"replyToken\": \"nHuyWiB7yP5Zw52FIkcQobQuGDXCTA\",\n        \"type\": \"message\",\n        \"timestamp\": 1462629479859,\n        \"source\": {\n          \"type\": \"user\",\n          \"userId\": \"U206d25c2ea6bd87c17655609a1c37cb8\"\n        },\n        \"message\": {\n          \"id\": \"325708\",\n          \"type\": \"text\",\n          \"text\": \"btc\"\n        }\n      }\n    ]\n}"
+				},
+				"url": {
+					"raw": "{{line_bot_host}}/webhook",
+					"host": [
+						"{{line_bot_host}}"
+					],
+					"path": [
+						"webhook"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "26187ddc-3538-4d76-a6b9-8d95af0b99d6",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "03b2a954-0b45-49ae-acd7-3dd2fbdb9be7",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
