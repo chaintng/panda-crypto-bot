@@ -59,6 +59,14 @@ function findBxObject(bxJson, currency) {
     return bxJson[currencyKey] || null
 }
 
+function getSupportedCurrencies(bxJson) {
+    return Object.keys(bxJson).filter((eachKey) => {
+        return bxJson[eachKey].primary_currency === 'THB'
+    }).map((eachKey) => {
+        return bxJson[eachKey].secondary_currency
+    })
+}
+
 function handleEvent(event) {
     if (event.type !== 'message' || event.message.type !== 'text') {
         return Promise.resolve(null);
@@ -109,6 +117,13 @@ function handleEvent(event) {
                             }
                         ]);
                     })
+            } else if (triggerMsg === 'PANDA HELP') {
+                return client.replyMessage(event.replyToken, [
+                    {
+                        type: 'text',
+                        text: `Panda Bot รองรับการดูราคา ทองคำ (GOLD) และ สกุลเงิน ดังนี้: ${getSupportedCurrencies(bxJson).join(', ')}`
+                    }
+                ]);
             } else {
                 return Promise.resolve()
             }
