@@ -110,12 +110,7 @@ function handleEvent(event) {
                         ]);
                     })
             } else {
-                return Promise.resolve(client.replyMessage(event.replyToken, [
-                    {
-                        type: 'text',
-                        text: 'Currency: ' + triggerMsg + ' not supported'
-                    }
-                ]))
+                return Promise.resolve()
             }
         })
 }
