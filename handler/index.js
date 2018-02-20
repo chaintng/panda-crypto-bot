@@ -88,7 +88,7 @@ function handleEvent(event) {
                     const coindeskJson = JSON.parse(output[1])
                     usdPriceText = ` (ตลาดโลก $${coindeskJson.bpi.USD.rate})`
                     fetchBitcoinChart().then((imageReply) => {
-                        client.replyMessage(event.replyToken, imageReply)
+                        client.pushMessage(event.source.userId, imageReply)
                     })
                 }
 
