@@ -13,19 +13,16 @@ const client = new line.Client(config);
 imgur.setClientID(config.imgurClientId)
 
 const webhook = (req, res) => {
-    Promise
-        .all(req.body.events.map(handleEvent))
-        .then((result) => {
-            console.log(result)
-            return res.json(result)
-        })
-        .catch((e) => {
-            console.log(e)
-            return res.send("Error")
-        })
+  Promise
+      .all(req.body.events.map(handleEvent))
+      .catch((e) => {
+          console.log(e)
+      })
+  return res.json({status: 'ok'})
 }
 
 function fetchBitcoinChart() {
+    console.time('fetch-bitcoin-chart');
     return new Pageres({delay: 2})
         .src('https://bitcoincharts.com/charts/bitstampUSD', ['1000x500'], {
             crop: true,
@@ -36,7 +33,10 @@ function fetchBitcoinChart() {
         .run()
         .then(() => {
             return new Promise((resolve, reject) => {
+                console.timeEnd('fetch-bitcoin-chart');
+                console.time('upload-coinbase-chart');
                 imgur.upload(path.join(__dirname, 'coinbasechart.png'), function (err, res) {
+                    console.timeEnd('upload-coinbase-chart');
                     if (res.data.link) {
                         debug('Crypto Chart Image', res.data.link)
                         resolve([{
@@ -69,48 +69,46 @@ function getSupportedCurrencies(bxJson) {
 
 function handleEvent(event) {
     if (event.type !== 'message' || event.message.type !== 'text') {
-        return Promise.resolve(null);
+        return Promise.resolve('ok');
     }
 
     let triggerMsg = event.message.text.toUpperCase()
     triggerMsg = triggerMsg === 'BITCOIN' ? 'BTC' : triggerMsg
 
+    console.time('call-bx-api');
     return Promise.all([request("https://bx.in.th/api/"), request("https://api.coindesk.com/v1/bpi/currentprice.json")])
         .then((output) => {
+            console.timeEnd('call-bx-api');
             const bxJson = JSON.parse(output[0])
             const bxObject = findBxObject(bxJson, triggerMsg)
             if (bxObject) {
                 let usdPriceText = ''
-                let imageReply = Promise.resolve([])
 
                 if (triggerMsg === 'BTC') {
                     const coindeskJson = JSON.parse(output[1])
                     usdPriceText = ` (ตลาดโลก $${coindeskJson.bpi.USD.rate})`
-                    imageReply = fetchBitcoinChart()
+                    fetchBitcoinChart().then((imageReply) => {
+                        client.replyMessage(event.replyToken, imageReply)
+                    })
                 }
 
                 const lastPrice = commaNumber(bxObject.last_price)
                 const change = bxObject.change
                 const text = `ราคา ${triggerMsg.toUpperCase()} ตอนนี้เท่ากับ ${lastPrice} บาท${usdPriceText}, เปลี่ยนแปลง ${change}%`
-
-                return imageReply
-                    .then((imageReply) => {
-                        let replyMessage = [
-                            {
-                                type: 'text',
-                                text: text
-                            }
-                        ]
-                        if (imageReply.length > 0) {
-                            replyMessage = replyMessage.concat(imageReply)
-                        }
-                        return client.replyMessage(event.replyToken, replyMessage);
-                    })
+                const replyMessage = [
+                  {
+                    type: 'text',
+                    text: text
+                  }
+                ]
+                client.replyMessage(event.replyToken, replyMessage);
             } else if (triggerMsg === 'GOLD') {
+              console.time('call-gold-api');
                 return request('http://www.thaigold.info/RealTimeDataV2/gtdata_.txt')
                     .then((output) => {
+                        console.timeEnd('call-bx-api');
                         const goldJson = JSON.parse(output)
-                        return client.replyMessage(event.replyToken, [
+                        client.replyMessage(event.replyToken, [
                             {
                                 type: 'text',
                                 text: `ราคา "ทองคำ" ตอนนี้เท่ากับ ${commaNumber(goldJson[4].bid)} บาท (ตลาดโลก $${commaNumber(goldJson[1].bid)}), เปลี่ยนแปลง ${goldJson[4].diff}`
@@ -118,18 +116,17 @@ function handleEvent(event) {
                         ]);
                     })
             } else if (triggerMsg === 'PANDA HELP') {
-                return client.replyMessage(event.replyToken, [
+                client.replyMessage(event.replyToken, [
                     {
                         type: 'text',
                         text: `Panda Bot รองรับการดูราคา ทองคำ (GOLD) และ สกุลเงิน ดังนี้: ${getSupportedCurrencies(bxJson).join(', ')}`
                     }
                 ]);
-            } else {
-                return Promise.resolve()
             }
+          return Promise.resolve('ok')
         })
 }
 
 module.exports = {
-    webhook: webhook
+    webhook
 }
