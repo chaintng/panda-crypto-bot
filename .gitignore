@@ -1,5 +1,6 @@
 .env
 node_modules
-coinbasechart.png
+lib/coinbasechart.png
 .idea
-handler/coinbasechart.*
+lib/coinbasechart.*
+now.json
