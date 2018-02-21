@@ -31,7 +31,9 @@ function handleEvent(event) {
       })
   } else {
     historicalChartApi.getChartPicture(triggerMsg).then((message) => {
-      client.pushMessage(event.source.groupId || event.source.userId, message)
+      if (message) {
+        client.pushMessage(event.source.groupId || event.source.userId, message)
+      }
     })
     cryptoApi.getLatestPrice(triggerMsg)
       .then(message => {
