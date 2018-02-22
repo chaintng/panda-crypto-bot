@@ -28,10 +28,10 @@ function handleEvent(event) {
 
   if (triggerMsg === 'NEXT') {
     richMenuApi.nextPage(event.source.userId)
-      .then(() => client.pushMessage(event.source.groupId || event.source.userId, [{type: 'text', text: 'เปลี่ยนหน้าสำเร็จ'}]))
+      .then(() => client.pushMessage(event.source.groupId || event.source.userId, [{type: 'text', text: 'เปลี่ยนหน้าสำเร็จ 👌'}]))
   } else if (triggerMsg === 'PREVIOUS') {
     richMenuApi.previousPage(event.source.userId)
-      .then(() => client.pushMessage(event.source.groupId || event.source.userId, [{type: 'text', text: 'เปลี่ยนหน้าสำเร็จ'}]))
+      .then(() => client.pushMessage(event.source.groupId || event.source.userId, [{type: 'text', text: 'เปลี่ยนหน้าสำเร็จ 👌'}]))
   } else if (triggerMsg === 'GOLD') {
     goldApi.getLatestPrice(triggerMsg)
       .then(message => {
