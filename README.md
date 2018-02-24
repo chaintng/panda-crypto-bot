@@ -14,4 +14,4 @@ This is LINE bot for checking cryptocurrency price.
 3. Retrieve the Rich Menu ID from 2) and put into environment variable
 
 ## Screenshot
-![screenshot.jpg]
+![Screenshot](./screenshot.gif)
