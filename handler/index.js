@@ -19,14 +19,27 @@ const webhook = (req, res) => {
 }
 
 function handleEvent(event) {
-  if (event.type !== 'message' || event.message.type !== 'text') {
+  let triggerMsg;
+
+  if (event.type == 'postback') {
+    triggerMsg = event.postback.data.toUpperCase()
+  } else if (event.type == 'message') {
+    triggerMsg = event.message.text.toUpperCase()
+  } else {
     return Promise.resolve('ok');
   }
 
-  let triggerMsg = event.message.text.toUpperCase()
   triggerMsg = triggerMsg === 'BITCOIN' ? 'BTC' : triggerMsg
 
-  if (triggerMsg === 'NEXT') {
+  if (triggerMsg === "SUBSCRIBE") {
+    // TODO Set real subscription
+    return client.replyMessage(event.replyToken, [
+      {
+        type: 'text',
+        text: `⏰ ตั้งเวลาการส่งราคาเป็น ${event.postback.params.time} สำเร็จแล้ว`
+      }
+    ])
+  } else if (triggerMsg === 'NEXT') {
     richMenuApi.nextPage(event.source.userId)
       .then(() => client.pushMessage(event.source.groupId || event.source.userId, [{type: 'text', text: 'เปลี่ยนหน้าสำเร็จ 👌'}]))
   } else if (triggerMsg === 'PREVIOUS') {

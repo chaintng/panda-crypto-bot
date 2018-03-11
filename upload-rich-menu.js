@@ -97,8 +97,12 @@ housekeeping.then(() => {
               height: 843
             },
             action: {
-              type: 'message',
-              text: 'HELP'
+              type: "datetimepicker",
+              label: "Subscribe",
+              data: "subscribe",
+              mode: "time",
+              text: "Subscribe",
+              initial: "08:00"
             }
           }
         ]
