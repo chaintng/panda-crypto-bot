@@ -10,12 +10,12 @@ const client = new line.Client(config);
 
 const webhook = (req, res) => {
   console.log("User id: " + req.body.events[0].source.userId)
-  Promise
+  res.json({status: 'ok'})
+  return Promise
       .all(req.body.events.map(handleEvent))
       .catch((e) => {
           console.log(e)
       })
-  return res.json({status: 'ok'})
 }
 
 function handleEvent(event) {
@@ -40,28 +40,30 @@ function handleEvent(event) {
       }
     ])
   } else if (triggerMsg === 'NEXT') {
-    richMenuApi.nextPage(event.source.userId)
+    return richMenuApi.nextPage(event.source.userId)
       .then(() => client.pushMessage(event.source.groupId || event.source.userId, [{type: 'text', text: 'เปลี่ยนหน้าสำเร็จ 👌'}]))
   } else if (triggerMsg === 'PREVIOUS') {
-    richMenuApi.previousPage(event.source.userId)
+    return richMenuApi.previousPage(event.source.userId)
       .then(() => client.pushMessage(event.source.groupId || event.source.userId, [{type: 'text', text: 'เปลี่ยนหน้าสำเร็จ 👌'}]))
   } else if (triggerMsg === 'GOLD') {
-    goldApi.getLatestPrice(triggerMsg)
+    return goldApi.getLatestPrice(triggerMsg)
       .then(message => {
-        client.replyMessage(event.replyToken, message);
+        return client.replyMessage(event.replyToken, message);
       })
   } else {
-    historicalChartApi.getChartPicture(triggerMsg).then((message) => {
+    const chartPromise = historicalChartApi.getChartPicture(triggerMsg).then((message) => {
       if (message) {
-        client.pushMessage(event.source.groupId || event.source.userId, message)
+        return client.pushMessage(event.source.groupId || event.source.userId, message)
       }
     })
-    cryptoApi.getLatestPrice(triggerMsg)
+    const latestPricePromise = cryptoApi.getLatestPrice(triggerMsg)
       .then(message => {
         if (message) {
-          client.replyMessage(event.replyToken, message);
+          return client.replyMessage(event.replyToken, message)
         }
+        return Promise.resolve()
       })
+    return Promise.all([chartPromise, latestPricePromise])
   }
 }
 
