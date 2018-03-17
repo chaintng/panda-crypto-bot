@@ -15,3 +15,6 @@ This is LINE bot for checking cryptocurrency price.
 
 ## Screenshot
 ![Screenshot](./screenshot.gif)
+
+## TBD
+- Automated Build
