@@ -3,7 +3,8 @@ const config = {
   channelSecret: process.env.LINE_CHANNEL_SECRET,
   imgurClientId: process.env.IMGUR_CLIENT_ID,
   cryptoPage2RichMenuId: process.env.CRYPTO_PAGE_2_RICH_MENU_ID,
-  verify: false
+  verify: false,
+  redisUrl: process.env.REDIS_URL
 }
 
 module.exports = config;

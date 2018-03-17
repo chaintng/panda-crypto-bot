@@ -67,6 +67,4 @@ function handleEvent(event) {
   }
 }
 
-module.exports = {
-  webhook
-}
+module.exports = webhook
